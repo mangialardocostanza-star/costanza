@@ -292,7 +292,14 @@ bool validarEmail(const char* email) {
     return tienearroba && tienepunto;
 }
 
-
+int compararFechas (const char* fecha1, const char* fecha2){
+    //asumiendo el formato de YYYY-MM-DD
+    for (int i=0; i<10; i++){
+        if (fecha1[i] < fecha2[i]) return -1;
+        if (fecha1[i] > fecha2[i]) return 1;
+    }
+    return 0; //son iguales
+}
 
 
 // =========================================================================
