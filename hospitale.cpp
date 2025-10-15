@@ -301,6 +301,80 @@ int compararFechas (const char* fecha1, const char* fecha2){
     return 0; //son iguales
 }
 
+//funcion para limpiar buffer de entrada
+void limpiarBuffer() {
+    while (cin.get() != '\n');
+}
+
+
+//--------------------------------------------
+
+//Gestion de memoria / utilidades
+
+//--------------------------------------------
+Hospital*inicializarHospital(const char* nombre){
+    Hospital*hospital =new Hospital;
+// copiamos la info basica
+    strncpy(hospital->nombre,nombre,99);
+    hospital->nombre[99]='\0' ;
+    hospital->direccion[0]='\0' ;
+    hospital->telefono[0]='\0' ;
+    
+    //inicilizar arrays de pacientes
+    hospital->capacidadPacientes = 10;
+    hospital->cantidadPacientes = 0;
+    hospital->pacientes = new Paciente[hospital->capacidadPacientes];
+
+    //inicilizar arrays de doctores
+    hospital->capacidadDoctores = 10;
+    hospital->cantidadDoctores = 0;
+    hospital->doctores = new Doctor[hospital->capacidadDoctores];
+
+    //inicilizar arrays de citas
+    hospital->capacidadCitas = 20;
+    hospital->cantidadCitas = 0;
+    hospital->citas = new Cita[hospital->capacidadCitas];
+
+    //inicilizar ids
+    hospital->siguienteIdPaciente = 1;
+    hospital->siguienteIdDoctor = 1;
+    hospital->siguienteIdCita = 1;
+    hospital->siguienteIdConsulta = 1;
+
+    return hospital;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // =========================================================================
 // PUNTO DE ENTRADA PRINCIPAL
