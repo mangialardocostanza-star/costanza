@@ -208,36 +208,29 @@ bool validarFecha(const char* fecha){
     }
 //verificamos que el numero corresponda 
 for(int i=0; i<10;i++) {
-    if (i==4 || i==7 ){
-        continue;
-    }
-    
-//saltar guiones 
-
-if (fecha[i] < '0' || fecha[i]>'9') {
+    if (i==4 || i==7 ) 
+continue;//saltamos los guiones
+    if (fecha[i] < '0' || fecha[i]>'9') {
     return false;
-    }
- 
+      }
 }
 
-//extraemos ano,mes y dia 
+//extraemos año,mes y dia 
 
-año = (fecha[0]-'0')* 1000 +
+año =    (fecha[0]-'0')* 1000 +
          (fecha[1]-'0')* 100 +
          (fecha[2]-'0')* 10 +
          (fecha[3]-'0');
-mes = (fecha[5]-'0')* 10 + (fecha[6]-'0');
-dia = (fecha[8]-'0')* 10 + (fecha[9]- '0');
+mes =    (fecha[5]-'0')* 10 + (fecha[6]-'0');
+dia =    (fecha[8]-'0')* 10 + (fecha[9]- '0');
 
  return true;
-
-
-
 //validar rangos 
 
     if ( año < 1900 || año > 2100) return false;
     if (mes < 1 || mes > 12) return false;
     if (dia < 1 || dia > 31) return false;
+
 //verificar dias segun mes
 
 if (mes==4 || mes==6 || mes==9 || mes==11) {
@@ -249,11 +242,55 @@ if (mes==4 || mes==6 || mes==9 || mes==11) {
         } else {
             if (dia > 28) return false;
         }
-        return true;
+       
     }
     
+      return true;
 }
 
+//funcion para validar la hora en formato HH:MM
+
+bool validarHora(const char* hora) {
+    if (strlen(hora) != 5) return false;{
+    }
+    if (hora[2] != ':') return false;{
+    }
+    for (int i = 0; i < 5; i++) {
+        if (i == 2) continue; // saltar el ':'
+        if (hora[i] < '0' || hora[i] > '9') {return false;
+    }
+    }
+    int HH = (hora[0] - '0') * 10 + (hora[1] - '0');
+    int MM = (hora[3] - '0') * 10 + (hora[4] - '0');
+    if (HH < 0 || HH > 23) return false;
+    if (MM < 0 || MM > 59) return false;
+    return true;
+}
+
+//funcion para validar la cedula 
+bool validarCedula(const char* cedula) {
+    if (cedula == nullptr|| strlen (cedula) == 0 || strlen(cedula)>20){
+        return false;
+    }
+    return true;
+}
+
+//funcion para validar el email
+bool validarEmail(const char* email) {
+    if(email==nullptr|| strlen (email)==0){\
+        return false;
+    }
+    bool tienearroba=false;
+    bool tienepunto=false;
+    for(int i=0;email[i]!='0';i++){
+        if(email[i]=='@'){
+            tienearroba=true;
+        } else if(email[i]=='.' && tienearroba){
+            tienepunto=true;
+        }
+    }
+    return tienearroba && tienepunto;
+}
 
 
 
