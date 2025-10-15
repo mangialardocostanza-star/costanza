@@ -169,3 +169,102 @@ void menuPacientes(Hospital* hospital);
 void menuDoctores(Hospital* hospital);
 void menuCitas(Hospital* hospital);
 
+//-------------------------------------------
+
+//3.Definir funciones 
+
+//-------------------------------------------
+
+//5.MODULO DE UTILIDADES Y HELPERS
+
+//--------------------------------------------
+
+
+//primero necesitamos una funcion para comparar los strings sin importar que tenga mayuscula o minuscula
+
+int mi_strcasecmp(const char*s1,const char*s2){
+
+    //esta funcion se necesita para buscar pacientes y doctores sin importar si esta escrito con mayuscula o minuscula
+while(*s1 && *s2){
+    char c1 = (*s1 >= 'A' && *s1 <= 'Z') ? *s1 + 32 : *s1;
+    char c2 = (*s2 >= 'A' && *s2 <= 'Z') ? *s2 + 32 : *s2;
+    if(c1 != c2) return c1 - c2;
+        s1++;
+        s2++;
+    }
+return *s1 - *s2;
+}
+
+//funcion para validar la fecha en YYYY-MM-DD
+
+bool validarFecha(const char* fecha){
+    int año, mes, dia;
+    if(strlen(fecha)!=10){
+        return false;
+    }
+//Para verificar el formato con guiones
+    if(fecha[4]!='-' || fecha[7]!='-') {
+        return false;
+    }
+//verificamos que el numero corresponda 
+for(int i=0; i<10;i++) {
+    if (i==4 || i==7 ){
+        continue;
+    }
+    
+//saltar guiones 
+
+if (fecha[i] < '0' || fecha[i]>'9') {
+    return false;
+    }
+ 
+}
+
+//extraemos ano,mes y dia 
+
+año = (fecha[0]-'0')* 1000 +
+         (fecha[1]-'0')* 100 +
+         (fecha[2]-'0')* 10 +
+         (fecha[3]-'0');
+mes = (fecha[5]-'0')* 10 + (fecha[6]-'0');
+dia = (fecha[8]-'0')* 10 + (fecha[9]- '0');
+
+ return true;
+
+
+
+//validar rangos 
+
+    if ( año < 1900 || año > 2100) return false;
+    if (mes < 1 || mes > 12) return false;
+    if (dia < 1 || dia > 31) return false;
+//verificar dias segun mes
+
+if (mes==4 || mes==6 || mes==9 || mes==11) {
+    if (dia>30) return false;
+} else if (mes==2) {
+    bool esBisiesto = (año % 4 == 0 && año % 100 != 0) || (año% 400 == 0);
+        if (esBisiesto) {
+            if (dia > 29) return false;
+        } else {
+            if (dia > 28) return false;
+        }
+        return true;
+    }
+    
+}
+
+
+
+
+
+// =========================================================================
+// PUNTO DE ENTRADA PRINCIPAL
+// =========================================================================
+int main() {
+    iniciarSistema();
+    return 0;
+} 
+
+
+
