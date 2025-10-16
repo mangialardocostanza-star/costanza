@@ -345,7 +345,41 @@ Hospital*inicializarHospital(const char* nombre){
 
 }
 
+//Destruir hospital y liberar la memoria
 
+void destruirHospital(Hospital*hospital){
+    if(hospital==nullptr) return;
+    //liberar memoria de pacientes
+    for(int i=0; i<hospital->cantidadPacientes;i++){
+        Paciente*paciente =&hospital->pacientes[i];
+        if(paciente->historial!=nullptr){
+            delete[] paciente->historial;
+        }
+        if(paciente->citasAgendadas!=nullptr){
+            delete[] paciente->citasAgendadas;
+        }
+}
+//liberar memoria de doctores
+    for(int i=0; i<hospital->cantidadDoctores;i++){
+        Doctor*doctor =&hospital->doctores[i];
+        if(doctor->pacientesAsignados!=nullptr){
+            delete[] doctor->pacientesAsignados;
+        }
+        if(doctor->citasAgendadas!=nullptr){
+            delete[] doctor->citasAgendadas;
+        }
+    }
+    //liberar arrays principales
+    if(hospital->pacientes!=nullptr){ 
+        delete[] hospital->pacientes;}
+    if (hospital->doctores!=nullptr){
+        delete[] hospital->doctores;}
+    if(hospital->citas!=nullptr){
+         delete[] hospital->citas;}
+   
+    //liberar estructura hospital
+    delete hospital;
+}
 
 
 
@@ -380,7 +414,7 @@ Hospital*inicializarHospital(const char* nombre){
 // PUNTO DE ENTRADA PRINCIPAL
 // =========================================================================
 int main() {
-    iniciarSistema();
+   
     return 0;
 } 
 
