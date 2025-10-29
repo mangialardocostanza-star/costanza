@@ -1470,9 +1470,9 @@ Cita** obtenerCitasPorFecha(Hospital* hospital, const char* fecha, int* cantidad
 void listarCitasPendientes(Hospital* hospital) {
     cout << "\n╔══════════════════════════════════════════════════════════════════════════════════════╗" << endl;
     cout << "║                              CITAS PENDIENTES                                       ║" << endl;
-    cout << "╠═════╦═════╦═════╦════════════╦══════╦══════════════════════════════════════╦════════╣" << endl;
-    cout << "║ ID  ║ PAC ║ DOC ║ FECHA      ║ HORA ║ MOTIVO                              ║ ESTADO ║" << endl;
-    cout << "╠═════╬═════╬═════╬════════════╬══════╬══════════════════════════════════════╬════════╣" << endl;
+    cout << "╠═════╦════════╦════════╦════════════╦═══════╦════════════════════════════════════╦═════════╣" << endl;
+    cout << "║ ID  ║ PAC    ║ DOC    ║ FECHA      ║ HORA  ║ MOTIVO                             ║ ESTADO  ║" << endl;
+    cout << "╠═════╬════════╬════════╬════════════╬═══════╬════════════════════════════════════╬═════════╣" << endl;
 
     int citasPendientes = 0;
     for (int i = 0; i < hospital->cantidadCitas; i++) {
@@ -1493,7 +1493,7 @@ void listarCitasPendientes(Hospital* hospital) {
             
             cout << "║ " << setw(3) << left << hospital->citas[i].id << " ";
             cout << "║ " << setw(3) << left << nombrePaciente << " ";
-            cout << "║ " << setw(3) << left << nombreDoctor << " ";
+            cout << "║ " << setw(5) << left << nombreDoctor << " ";
             cout << "║ " << setw(10) << left << hospital->citas[i].fecha << " ";
             cout << "║ " << setw(4) << left << hospital->citas[i].hora << " ";
             
@@ -1513,7 +1513,7 @@ void listarCitasPendientes(Hospital* hospital) {
         cout << "║                         NO HAY CITAS PENDIENTES                           ║" << endl;
     }
 
-    cout << "╚═════╩═════╩═════╩════════════╩══════╩══════════════════════════════════════╩════════╝" << endl;
+    cout << "╚═════╩════════╩════════╩════════════╩═══════╩════════════════════════════════════╩═════════╝" << endl;
     cout << "Total de citas pendientes: " << citasPendientes << endl;
 }
 
