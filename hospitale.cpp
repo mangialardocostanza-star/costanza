@@ -224,7 +224,7 @@ año =    (fecha[0]-'0')* 1000 +
 mes =    (fecha[5]-'0')* 10 + (fecha[6]-'0');
 dia =    (fecha[8]-'0')* 10 + (fecha[9]- '0');
 
- return true;
+
 //validar rangos 
 
     if ( año < 1900 || año > 2100) return false;
