@@ -1588,7 +1588,7 @@ void menuPacientes(Hospital* hospital) {
         
         switch(opcion) {
             case 1: {
-                char nombre[50], apellido[50], cedula[20];
+                char nombre[50], apellido[50], cedula[20], tipoSangre[5], telefono[20], direccion[100], email[50],alergias[200],observaciones[200];
                 int edad;
                 char sexo;
                 
@@ -1605,6 +1605,21 @@ void menuPacientes(Hospital* hospital) {
                 cout << "Sexo (M/F): ";
                 cin >> sexo;
                 limpiarBuffer();
+                cout << "tipo de Sangre: ";
+                cin.getline(tipoSangre, 5);
+                cout << "telefono: ";
+                cin.getline(telefono, 20);
+                cout << "Direccion: ";
+                cin.getline(direccion, 100);
+                cout << "email: ";
+                cin.getline(email, 50);
+                cout << "alegias: ";
+                cin.getline(alergias, 200);
+                cout << "observaciones: ";
+                cin.getline(observaciones, 200);
+                
+                
+
                 
                 crearPaciente(hospital, nombre, apellido, cedula, edad, sexo);
                 pausar();
@@ -1736,7 +1751,7 @@ void menuDoctores(Hospital* hospital) {
         
         switch(opcion) {
             case 1: {
-                char nombre[50], apellido[50], cedula[20], especialidad[50];
+                char nombre[50], apellido[50], cedula[20], especialidad[50],horarioAtencion[50],telefono[20],email[50];
                 int aniosExperiencia;
                 float costoConsulta;
                 
@@ -1754,6 +1769,15 @@ void menuDoctores(Hospital* hospital) {
                 cout << "Costo de consulta: ";
                 cin >> costoConsulta;
                 limpiarBuffer();
+                cout << "horario de atencion: ";
+                cin >> horarioAtencion;
+                limpiarBuffer();
+                cout << "telefono: ";
+                cin.getline(telefono, 20);
+                cout << "email: ";
+                cin.getline(email, 50);
+                
+                
   crearDoctor(hospital, nombre, apellido, cedula, especialidad, aniosExperiencia, costoConsulta);
                 pausar();
                 break;
