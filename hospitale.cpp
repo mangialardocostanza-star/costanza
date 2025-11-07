@@ -4,14 +4,28 @@
 #include <iomanip>
 #include <cctype>
 #include<fstream>
-
+#include<cstddef> //para tipos estadar como size_t
+#include<limits>//para numeric_limits
 using namespace std;
 
+
+//0. ESTRUCTURA PARA ARCHIVOS BINARIOS
+// Estructura que va al inicio de cada archivo .bin para saber cuántos datos hay y el próximo ID.
+struct ArchivoHeader {
+    int cantidadRegistros;
+    int siguienteId;
+    int registrosActivos;
+    int version;
+};
 //--------------------------------
 
 //1.MODELO DE DATOS
 
+// Estructura HistorialMedico (archivo: historiales.bin)
+
 struct HistorialMedico {
+    int id;
+    int idPaciente;
     int idConsulta;
     char fecha[11];
     char hora[6];
@@ -20,7 +34,15 @@ struct HistorialMedico {
     char medicamentos[150];
     int idDoctor;
     float costo;
+
+     //navegacion enlazada 
+    int siguienteConsultaId;
+    //Metadata 
+    bool eliminado;
+    time_t fecharegistro;
 };
+
+// Estructura Cita (archivo: citas.bin)
 
 struct Cita {
     int id;
@@ -32,7 +54,17 @@ struct Cita {
     char estado[20];
     char observaciones[200];
     bool atendida;
+
+    //Referencia del historial
+    int consultaID;
+    //Metadata 
+    bool eliminado;
+    time_t fechaCreacion;
+    time_t fechaModificacion;
+
+   
 };
+// Estructura Paciente (archivo: pacientes.bin)
 
 struct Paciente {
     int id;
@@ -45,20 +77,23 @@ struct Paciente {
     char telefono[15];
     char direccion[100];
     char email[50];
-    
-    HistorialMedico* historial;
-    int cantidadConsultas;
-    int capacidadHistorial;
-    
-    int* citasAgendadas;
-    int cantidadCitas;
-    int capacidadCitas;
-    
     char alergias[500];
     char observaciones[500];
-    
     bool activo;
+
+    //indices para relaciones 
+
+    int cantidadConsultas;
+    int primerConsultaID;
+    int cantidadCitas;
+    int citasIDs [20];
+
+    //Metadata 
+    bool eliminado;
+    time_t fechaCreacion;
+    time_t fechaModificacion;
 };
+// Estructura Doctor (archivo: doctores.bin)
 
 struct Doctor {
     int id;
@@ -71,39 +106,37 @@ struct Doctor {
     char horarioAtencion[50];
     char telefono[15];
     char email[50];
-    
-    int* pacientesAsignados;
-    int cantidadPacientes;
-    int capacidadPacientes;
-    
-    int* citasAgendadas;
-    int cantidadCitas;
-    int capacidadCitas;
-    
     bool disponible;
+
+    //relaciones con array fijos 
+    int CantidadPacientes;
+    int pacientesIDs[50];
+    int CantidadCitas;
+    int citasIDs[30];
+
+    //Metadata
+    bool eliminado;
+    time_t fechaCreacion;
+    time_t fechaModificacion;
 };
+// Estructura Hospital (archivo: hospital.bin) - Guarda contadores y datos generales
 
 struct Hospital {
     char nombre[100];
     char direccion[150];
     char telefono[15];
     
-    Paciente* pacientes;
-    int cantidadPacientes;
-    int capacidadPacientes;
-    
-    Doctor* doctores;
-    int cantidadDoctores;
-    int capacidadDoctores;
-    
-    Cita* citas;
-    int cantidadCitas;
-    int capacidadCitas;
-    
     int siguienteIdPaciente;
     int siguienteIdDoctor;
     int siguienteIdCita;
     int siguienteIdConsulta;
+
+    // Estadísticas
+    int totalPacientesRegistrados;
+    int totalDoctoresRegistrados;
+    int totalCitasAgendadas;
+    int totalConsultasRealizadas;
+
 };
 
 //--------------------------------
@@ -121,6 +154,12 @@ bool validarCedula(const char* cedula);
 bool validarEmail(const char* email);
 int compararFechas(const char* fecha1, const char* fecha2);
 void limpiarBuffer();
+void mostrarError(const char* mensaje);
+void mostrarExito(const char* mensaje);
+void pausar();
+
+//gestion de archivos binarios 
+
 
 // --- Gestión de Memoria / Utilidades ---
 Hospital* inicializarHospital(const char* nombre);
