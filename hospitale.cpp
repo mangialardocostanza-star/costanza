@@ -159,55 +159,48 @@ void mostrarExito(const char* mensaje);
 void pausar();
 
 //gestion de archivos binarios 
+bool inicializarArchivo(const char*nombreArchivo);
+ArchivoHeader leerHeader(const char* nombreArchivo);
+bool actualizarHeader(const char nombreArchivo,ArchivoHeader header);
+long calcularPosicion(const char*tipoArchivo,int indice);
 
+//Operaciones con hospital
+Hospital*cargarDatosHospital();
+bool guardarDatosHospital(Hospital* hospital);
 
-// --- Gestión de Memoria / Utilidades ---
-Hospital* inicializarHospital(const char* nombre);
-void destruirHospital(Hospital* hospital);
-void redimensionarArrayPacientes(Hospital* hospital);
-void redimensionarArrayDoctores(Hospital* hospital);
-void redimensionarArrayCitas(Hospital* hospital);
-void redimensionarArrayInt(int** array, int& cantidad, int& capacidad);
-void redimensionarHistorial(Paciente* paciente);
-bool removerIdDeArray(int* array, int& cantidad, int idARemover);
+//operaciones con pacientes
+bool agregarPaciente(Hospital* hospital, Paciente nuevoPaciente);
+Paciente buscarPacientePorID(int id);
+Paciente buscarPacientePorCedula(const char* cedula);
+bool actualizarPaciente(Paciente pacienteModificado);
+bool eliminarPaciente(int id);
+void listarTodosPacientes();
 
-// --- Módulo de Pacientes (CRUD) ---
-Paciente* crearPaciente(Hospital* hospital, const char* nombre, const char* apellido, const char* cedula, int edad, char sexo);
-Paciente* buscarPacientePorCedula(Hospital* hospital, const char* cedula);
-Paciente* buscarPacientePorId(Hospital* hospital, int id);
-Paciente** buscarPacientesPorNombre(Hospital* hospital, const char* nombre, int* cantidad);
-bool actualizarPaciente(Hospital* hospital, int id);
-bool eliminarPaciente(Hospital* hospital, int id);
-void listarPacientes(Hospital* hospital);
+// Operaciones con Doctores
+bool agregarDoctor(Hospital* hospital, Doctor nuevoDoctor);
+Doctor buscarDoctorPorID(int id);
+bool actualizarDoctor(Doctor doctorModificado);
+bool eliminarDoctor(int id);
+void listarTodosDoctores();
 
-// --- Historial Médico ---
-void agregarConsultaAlHistorial(Paciente* paciente, HistorialMedico consulta);
-HistorialMedico* obtenerHistorialCompleto(Paciente* paciente, int* cantidad);
-void mostrarHistorialMedico(Paciente* paciente);
+// Operaciones con Citas 
+bool agendarCita(Hospital* hospital, Cita nuevaCita);
+bool cancelarCita(int idCita);
+bool atenderCita(int idCita, const char* diagnostico, const char* tratamiento, const char* medicamentos);
+Cita* obtenerCitasDePaciente(int pacienteID, int* cantidad);
 
-// --- Módulo de Doctores (CRUD) ---
-Doctor* crearDoctor(Hospital* hospital, const char* nombre, const char* apellido, const char* cedula, const char* especialidad, int aniosExperiencia, float costoConsulta);
-Doctor* buscarDoctorPorId(Hospital* hospital, int id);
-Doctor** buscarDoctoresPorEspecialidad(Hospital* hospital, const char* especialidad, int* cantidad);
-bool asignarPacienteADoctor(Doctor* doctor, int idPaciente);
-bool removerPacienteDeDoctor(Doctor* doctor, int idPaciente);
-void listarDoctores(Hospital* hospital);
-bool eliminarDoctor(Hospital* hospital, int id);
+// Operaciones con Historial Médico 
+bool agregarConsultaAlHistorial(int pacienteID, HistorialMedico nuevaConsulta);
+HistorialMedico* leerHistorialCompleto(int pacienteID, int* cantidad);
 
-// --- Módulo de Citas (CRUD) ---
-Cita* agendarCita(Hospital* hospital, int idPaciente, int idDoctor, const char* fecha, const char* hora, const char* motivo);
-bool cancelarCita(Hospital* hospital, int idCita);
-bool atenderCita(Hospital* hospital, int idCita, const char* diagnostico, const char* tratamiento, const char* medicamentos);
-Cita** obtenerCitasDePaciente(Hospital* hospital, int idPaciente, int* cantidad);
-void listarCitasPendientes(Hospital* hospital);
-bool verificarDisponibilidad(Hospital* hospital, int idDoctor, const char* fecha, const char* hora);
-
-// --- Interfaz de Usuario ---
+// Interfaz de usuario
 void iniciarSistema();
 void mostrarMenuPrincipal();
 void menuPacientes(Hospital* hospital);
 void menuDoctores(Hospital* hospital);
 void menuCitas(Hospital* hospital);
+void menuMantenimiento(Hospital* hospital);//nos va apermitir manejar las opciones de administracion como limpieza , etc...
+
 
 //-------------------------------------------
 
@@ -264,7 +257,6 @@ año =    (fecha[0]-'0')* 1000 +
 mes =    (fecha[5]-'0')* 10 + (fecha[6]-'0');
 dia =    (fecha[8]-'0')* 10 + (fecha[9]- '0');
 
-
 //validar rangos 
 
     if ( año < 1900 || año > 2100) return false;
@@ -282,12 +274,9 @@ if (mes==4 || mes==6 || mes==9 || mes==11) {
         } else {
             if (dia > 28) return false;
         }
-       
     }
-    
-      return true;
+       return true;
 }
-
 //funcion para validar la hora en formato HH:MM
 
 bool validarHora(const char* hora) {
@@ -341,9 +330,24 @@ int compararFechas (const char* fecha1, const char* fecha2){
     return 0; //son iguales
 }
 
-//funcion para limpiar buffer de entrada
 void limpiarBuffer() {
-    while (cin.get() != '\n');
+    if (cin.fail() || cin.eof()) {
+        cin.clear();
+    }
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+void mostrarError(const char* mensaje) {
+    cout << "\n[ERROR] " << mensaje << endl;
+}
+
+void mostrarExito(const char* mensaje) {
+    cout << "\n[ÉXITO] " << mensaje << endl;
+}
+
+void pausar() {
+    cout << "\nPresione Enter para continuar..." << endl;
+    limpiarBuffer();
+    cin.get();
 }
 
 
@@ -352,203 +356,63 @@ void limpiarBuffer() {
 //Gestion de memoria / utilidades
 
 //--------------------------------------------
-Hospital*inicializarHospital(const char* nombre){
-    Hospital*hospital =new Hospital;
-// copiamos la info basica
-    strncpy(hospital->nombre,nombre,99);
-    hospital->nombre[99]='\0' ;
-    hospital->direccion[0]='\0' ;
-    hospital->telefono[0]='\0' ;
-    
-    //inicilizar arrays de pacientes
-    hospital->capacidadPacientes = 10;
-    hospital->cantidadPacientes = 0;
-    hospital->pacientes = new Paciente[hospital->capacidadPacientes];
+// Gestión de archivos binarios
+bool inicializarArchivo(const char* nombreArchivo) {
+    // Abre el archivo en modo binario, escritura y trunca (crea uno nuevo si existe)
+    fstream archivo(nombreArchivo, ios::binary | ios::out | ios::trunc);
+    if(!archivo.is_open()) return false;
 
-    //inicilizar arrays de doctores
-    hospital->capacidadDoctores = 10;
-    hospital->cantidadDoctores = 0;
-    hospital->doctores = new Doctor[hospital->capacidadDoctores];
+    // Crea y escribe el header inicial
+    ArchivoHeader header;
+    header.cantidadRegistros = 0;
+    header.proximoID = 1;
+    header.registrosActivos = 0;
+    header.version = 1;
 
-    //inicilizar arrays de citas
-    hospital->capacidadCitas = 20;
-    hospital->cantidadCitas = 0;
-    hospital->citas = new Cita[hospital->capacidadCitas];
-
-    //inicilizar ids
-    hospital->siguienteIdPaciente = 1;
-    hospital->siguienteIdDoctor = 1;
-    hospital->siguienteIdCita = 1;
-    hospital->siguienteIdConsulta = 1;
-
-    return hospital;
-
-}
-
-//Destruir hospital y liberar la memoria
-
-void destruirHospital(Hospital*hospital){
-    if(hospital==nullptr) return;
-    //liberar memoria de pacientes
-    for(int i=0; i<hospital->cantidadPacientes;i++){
-        Paciente*paciente =&hospital->pacientes[i];
-        if(paciente->historial!=nullptr){
-            delete[] paciente->historial;
-        }
-        if(paciente->citasAgendadas!=nullptr){
-            delete[] paciente->citasAgendadas;
-        }
-}
-//liberar memoria de doctores
-    for(int i=0; i<hospital->cantidadDoctores;i++){
-        Doctor*doctor =&hospital->doctores[i];
-        if(doctor->pacientesAsignados!=nullptr){
-            delete[] doctor->pacientesAsignados;
-        }
-        if(doctor->citasAgendadas!=nullptr){
-            delete[] doctor->citasAgendadas;
-        }
-    }
-    //liberar arrays principales
-    if(hospital->pacientes!=nullptr){ 
-        delete[] hospital->pacientes;}
-    if (hospital->doctores!=nullptr){
-        delete[] hospital->doctores;}
-    if(hospital->citas!=nullptr){
-         delete[] hospital->citas;}
-   
-    //liberar estructura hospital
-    delete hospital;
-}
-
-// Redimensionar array de pacientes
-void redimensionarArrayPacientes(Hospital* hospital) {
-    int nuevaCapacidad = hospital->capacidadPacientes * 2;
-    Paciente* nuevoArray = new Paciente[nuevaCapacidad];
-    
-    // Copiar pacientes existentes
-    for (int i = 0; i < hospital->cantidadPacientes; i++) {
-        nuevoArray[i] = hospital->pacientes[i];
-    }
-    
-    // Liberar array antiguo y actualizar
-    delete[] hospital->pacientes;
-    hospital->pacientes = nuevoArray;
-    hospital->capacidadPacientes = nuevaCapacidad;
-}
-
-// Redimensionar array de doctores
-void redimensionarArrayDoctores(Hospital* hospital) {
-    int nuevaCapacidad = hospital->capacidadDoctores * 2;
-    Doctor* nuevoArray = new Doctor[nuevaCapacidad];
-    
-    // Copiar doctores existentes
-    for (int i = 0; i < hospital->cantidadDoctores; i++) {
-        nuevoArray[i] = hospital->doctores[i];
-    }
-    
-    // Liberar array antiguo y actualizar
-    delete[] hospital->doctores;
-    hospital->doctores = nuevoArray;
-    hospital->capacidadDoctores = nuevaCapacidad;
-}
-
-// Redimensionar array de citas
-void redimensionarArrayCitas(Hospital* hospital) {
-    int nuevaCapacidad = hospital->capacidadCitas * 2;
-    Cita* nuevoArray = new Cita[nuevaCapacidad];
-    
-    // Copiar citas existentes
-    for (int i = 0; i < hospital->cantidadCitas; i++) {
-        nuevoArray[i] = hospital->citas[i];
-    }
-    
-    // Liberar array antiguo y actualizar
-    delete[] hospital->citas;
-    hospital->citas = nuevoArray;
-    hospital->capacidadCitas = nuevaCapacidad;
-}
-
- // Redimensionar array de enteros (genérico)
-void redimensionarArrayInt(int** array, int& cantidad, int& capacidad) {
-    int nuevaCapacidad = capacidad * 2;
-    int* nuevoArray = new int[nuevaCapacidad];
-    
-    // Copiar elementos existentes
-    for (int i = 0; i < cantidad; i++) {
-        nuevoArray[i] = (*array)[i];
-    }
-    
-    // Liberar array antiguo y actualizar
-    delete[] *array;
-    *array = nuevoArray;
-    capacidad = nuevaCapacidad;
-}
-
-// Redimensionar historial médico de un paciente
-void redimensionarHistorial(Paciente* paciente) {
-    int nuevaCapacidad = paciente->capacidadHistorial * 2;
-    HistorialMedico* nuevoArray = new HistorialMedico[nuevaCapacidad];
-    
-    // Copiar consultas existentes
-    for (int i = 0; i < paciente->cantidadConsultas; i++) {
-        nuevoArray[i] = paciente->historial[i];
-    }
-    
-    // Liberar array antiguo y actualizar
-    delete[] paciente->historial;
-    paciente->historial = nuevoArray;
-    paciente->capacidadHistorial = nuevaCapacidad;
-}
-
-// Remover ID de un array de enteros
-bool removerIdDeArray(int* array, int& cantidad, int idARemover) {
-    int indice = -1;
-    
-    // Buscar el ID
-    for (int i = 0; i < cantidad; i++) {
-        if (array[i] == idARemover) {
-            indice = i;
-            break;
-        }
-    }
-    
-    if (indice == -1) return false;
-    
-    // Mover elementos hacia adelante
-    for (int i = indice; i < cantidad - 1; i++) {
-        array[i] = array[i + 1];
-    }
-    
-    cantidad--;
+    archivo.write(reinterpret_cast<char*>(&header), sizeof(ArchivoHeader));
+    archivo.close();
     return true;
 }
 
-// Función para copiar string (deep copy)
-char* copiarString(const char* origen) {
-    if (origen == nullptr) return nullptr;
-    
-    int longitud = strlen(origen);
-    char* copia = new char[longitud + 1];
-    strcpy(copia, origen);
-    return copia;
+ArchivoHeader leerHeader(const char* nombreArchivo) {
+    ArchivoHeader header = {-1, -1, -1, -1}; // Valores de error
+    ifstream archivo(nombreArchivo, ios::binary);
+    if(archivo.is_open()) {
+        archivo.read(reinterpret_cast<char*>(&header), sizeof(ArchivoHeader));
+        archivo.close();
+    }
+    return header;
 }
-// Función auxiliar para mostrar mensajes de error
-void mostrarError(const char* mensaje) {
-    cout << " Error: " << mensaje << endl;
+bool actualizarHeader(const char* nombreArchivo, ArchivoHeader header) {
+    // Abre en modo binario, entrada y salida para poder modificar
+    fstream archivo(nombreArchivo, ios::binary | ios::in | ios::out);
+    if(!archivo.is_open()) return false;
+
+    // Se mueve al inicio del archivo (posición 0) y sobrescribe el header
+    archivo.seekp(0, ios::beg);
+    archivo.write(reinterpret_cast<char*>(&header), sizeof(ArchivoHeader));
+    archivo.close();
+    return true;
 }
 
-// Función auxiliar para mostrar mensajes de éxito
-void mostrarExito(const char* mensaje) {
-    cout << "✅ " << mensaje << endl;
+long calcularPosicion(const char* tipoArchivo, int indice) {
+    // Esta función no está implementada, es solo un placeholder
+    return -1;
+}
+// Operaciones con Hospital (Guarda contadores importantes en un archivo único)
+Hospital* cargarDatosHospital() {
+    // 1. Asegura que existan todos los archivos .bin
+    const char* archivos[] = { "hospital.bin", "pacientes.bin", "doctores.bin", "citas.bin", "historiales.bin" };
+    for(int i = 0; i < 5; i++) {
+        ifstream test(archivos[i]);
+        if(!test) {
+            cout << "Inicializando archivo: " << archivos[i] << endl;
+            inicializarArchivo(archivos[i]);
+        }
+        test.close();
+    }
 }
 
-// Función para pausar la ejecución
-void pausar() {
-    cout << "\nPresione Enter para continuar...";
-    cin.ignore();
-    cin.get();
-}
 
 //===========================================================
 // 2. MÓDULO DE GESTIÓN DE PACIENTES
