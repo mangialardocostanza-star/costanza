@@ -1269,7 +1269,7 @@ fstream archivo(FILE_PACIENTES, ios::binary | ios::in | ios::out);
         archivo.close();
         return false;
     }
-     // 8. Actualizar header.registrosActivos--
+     // 8. Actualizar header.registrosActivos
      ArchivoHeader header = leerHeader(FILE_PACIENTES);
      header.registrosActivos--;
     
@@ -1553,7 +1553,7 @@ HistorialMedico* leerHistorialCompleto(int pacienteID, int* cantidad) {
     int consultaActualID = paciente.primerConsultaID;
     int contador = 0;
     
-    // 6. Bucle: seguir enlaces (siguienteConsultaID) hasta -1
+    // 6. Bucle: seguir enlaces (siguienteConsultaID) 
     while (consultaActualID != 0 && contador < paciente.cantidadConsultas) {
         // Buscar consulta por ID en el archivo
         HistorialMedico consulta = buscarConsultaPorID(consultaActualID);
