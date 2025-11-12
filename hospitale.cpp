@@ -1215,30 +1215,7 @@ Paciente buscarPacientePorNombre(const char* nombre) {
     archivo.close();
     return paciente;
 }
-//leer por id
-Paciente leerPacienteporIndice(int indice){
-Paciente p;
-p.id=0; // marcar como no encontrado
-//validar indice
-if(indice < 0){
-    return p;
-}
-ifstream archivo(FILE_PACIENTES, ios::binary);
-if (!archivo.is_open()){
-    return p;
-}
-//calcular la posicion
-long posicion = sizeof(ArchivoHeader) + (indice * sizeof(Paciente));
-archivo.seekg(posicion);//ir directamente a la posicion
- // Leer estructura completa
-    archivo.read(reinterpret_cast<char*>(&p), sizeof(Paciente));
-    archivo.close();
-    // Verificar si el registro está activo
-    if (p.eliminado != 0) {
-        p.id = 0; // Marcar como no encontrado si está eliminado
-    }
-return p;
-}
+
 //buscar idice de id
 int buscarIndiceDeID(int id) {
     ifstream archivo(FILE_PACIENTES, ios::binary);
@@ -1553,11 +1530,11 @@ bool agregarConsultaAlHistorial(int pacienteID, HistorialMedico nuevaConsulta) {
 HistorialMedico* leerHistorialCompleto(int pacienteID, int* cantidad) {
     // 1. Leer paciente para obtener paciente.primerConsultaID
     Paciente paciente = buscarPacientePorID(pacienteID);
-    if (paciente.id == -1) {
+    if (paciente.id == 0) {
         *cantidad = 0;
         return NULL;
     }
-    if (paciente.primerConsultaID == -1) {
+    if (paciente.primerConsultaID == 0) {
         *cantidad = 0;
         return NULL;
     }
@@ -1577,11 +1554,11 @@ HistorialMedico* leerHistorialCompleto(int pacienteID, int* cantidad) {
     int contador = 0;
     
     // 6. Bucle: seguir enlaces (siguienteConsultaID) hasta -1
-    while (consultaActualID != -1 && contador < paciente.cantidadConsultas) {
+    while (consultaActualID != 0 && contador < paciente.cantidadConsultas) {
         // Buscar consulta por ID en el archivo
         HistorialMedico consulta = buscarConsultaPorID(consultaActualID);
         
-        if (consulta.id == -1) {
+        if (consulta.id == 0) {
             break; // Consulta no encontrada
         }
         // 7. Agregar cada consulta al array
@@ -1692,9 +1669,9 @@ void listarTodoHistorialMedico() {
             Paciente paciente = buscarPacientePorID(historial.PacienteID);
             Doctor doctor = buscarDoctorPorID(historial.DoctorID);
             
-            std::string nombrePaciente = (paciente.id != -1) ? 
+            std::string nombrePaciente = (paciente.id != 0) ? 
             std::string(paciente.nombre).substr(0, 1) + ". " + paciente.apellido : "N/A";
-            std::string nombreDoctor = (doctor.id != -1) ? 
+            std::string nombreDoctor = (doctor.id != 0) ? 
             std::string(doctor.nombre).substr(0, 1) + ". " + doctor.apellido : "N/A";
             
             std::cout << std::setw(3) << std::left << historial.id << " | ";
@@ -1788,45 +1765,27 @@ if (doctorActual.id == id && !doctorActual.eliminado ) {
     archivo.close();
     return doctor;
 }
-Doctor leerDoctorPorIndice(int indice){
-   Doctor doc;
-   doc.id=-1; // marcar como no encontrado
-   if (indice < 0) {
-        return doc;
-    }
-ifstream archivo (FILE_DOCTORES,ios::binary);
-if (!archivo.is_open()){
-    return doc;
-}
-long posicion = sizeof(ArchivoHeader) + (indice * sizeof(Doctor));
-archivo.seekg(posicion);
 
-archivo.read(reinterpret_cast<char*>(&doc), sizeof(Doctor));
-if (archivo.fail()){
-    cerr<<"Error al leer el doctor"<<endl;
-    doc.id=-1;
-}
-    archivo.close();
-    return doc;
-}
 
 bool actualizarDoctor(Doctor doctorModificado) {
-    int indice = buscarIndiceDoctorPorID(doctorModificado.id);
-    if (indice == -1) {
-        return false;
-    }
-    fstream archivo(FILE_DOCTORES, ios::binary | ios::in | ios::out);
-    if (!archivo.is_open()) {
-        return false;
-    }
-    long posicion = sizeof(ArchivoHeader) + (indice * sizeof(Doctor));
-    archivo.seekp(posicion);
-    doctorModificado.fechaModificacion = obtenerTimestamp();
-    archivo.write(reinterpret_cast<const char*>(&doctorModificado), sizeof(Doctor));
-    bool exito = !archivo.fail();
-    archivo.close();
-    return exito;
-} 
+   int indice = buscarIndiceDoctorPorID(doctorModificado.id);
+   if (indice == -1) {
+       return false;
+   }
+   fstream archivo(FILE_DOCTORES, ios::binary | ios::in | ios::out);
+   if (!archivo.is_open()) {
+       return false;
+   }
+   long posicion = sizeof(ArchivoHeader) + (indice * sizeof(Doctor));
+   archivo.seekp(posicion);
+   doctorModificado.fechaModificacion = obtenerTimestamp();
+   archivo.write(reinterpret_cast<const char*>(&doctorModificado), sizeof(Doctor));
+   bool exito = !archivo.fail();
+   archivo.close();
+   return exito;
+}
+
+
 //buscar idice de id
 int buscarIndiceDoctorPorID(int id) {
     // 1. ABRIR archivo de doctores
@@ -1998,7 +1957,7 @@ void listarPacientesDeDoctor(int idDoctor) {
         for (int i = 0; i < doctor.cantidadPacientes; i++) {
             // 2. BUSCAR CADA PACIENTE EN ARCHIVO
             Paciente paciente = buscarPacientePorID(doctor.pacientesIDs[i]);
-            if (paciente.id != -1 && !paciente.eliminado) {
+            if (paciente.id != 0 && !paciente.eliminado) {
                 std::cout << "║ " << std::setw(3) << std::left << paciente.id << " ";
                 std::cout << "║ " << std::setw(19) << std::left 
                          << (std::string(paciente.nombre) + " " + paciente.apellido).substr(0, 19) << " ";
@@ -2270,7 +2229,7 @@ bool agendarNuevaCita(int pacienteID, int doctorID, const char* fecha, const cha
     }
     
     // 6. ACTUALIZAR PACIENTE - agregar cita a su lista
-    if (paciente.cantidadCitas < 20) { // pacientesIDs[20] - array fijo
+    if (paciente.cantidadCitas < 20) { 
         paciente.citasIDs[paciente.cantidadCitas] = nuevaCita.id;
         paciente.cantidadCitas++;
         paciente.fechaModificacion = time(0);
@@ -2284,7 +2243,7 @@ bool agendarNuevaCita(int pacienteID, int doctorID, const char* fecha, const cha
     }
     
     // 7. ACTUALIZAR DOCTOR - agregar cita a su lista
-    if (doctor.cantidadCitas < 30) { // citasIDs[30] - array fijo
+    if (doctor.cantidadCitas < 30) { 
         doctor.citasIDs[doctor.cantidadCitas] = nuevaCita.id;
         doctor.cantidadCitas++;
         doctor.fechaModificacion = time(0);
@@ -2360,7 +2319,7 @@ bool cancelarCita(int idCita) {
 }
 // Atender cita - ACCESO ALEATORIO 
 bool atenderCita(int idCita, const char* diagnostico, const char* tratamiento, const char* medicamentos, float costo) {
-    // SOLO validaciones esenciales según requerimientos
+    // SOLO validaciones esenciales 
     if (idCita <= 0) {
         mostrarError("ID de cita inválido");
         return false;
@@ -2464,13 +2423,13 @@ bool atenderCita(int idCita, const char* diagnostico, const char* tratamiento, c
         HistorialMedico ultimaConsulta = buscarUltimaConsulta(paciente.primerConsultaID);
         if (ultimaConsulta.id != -1) {
             ultimaConsulta.siguienteConsultaId = nuevaConsulta.id;
-            actualizarConsulta(ultimaConsulta); // No verificar éxito - operación secundaria
+            actualizarConsulta(ultimaConsulta); // No verificar éxito 
         }
     }
     
     paciente.cantidadConsultas++;
     paciente.fechaModificacion = time(0);
-    actualizarPaciente(paciente); // No verificar éxito - operación secundaria
+    actualizarPaciente(paciente); // No verificar éxito 
 
     // 8. Actualizar estado de la cita
     strcpy(cita.estado, "Atendida");
@@ -2715,11 +2674,11 @@ void listarCitasPendientes() {
     archivoCitas.seekg(sizeof(ArchivoHeader));
     
     
-     std::cout << "\n╔══════════════════════════════════════════════════════════════════════╗" << std::endl;
-    std::cout << "║                              CITAS PENDIENTES                           ║" << std::endl;
-    std::cout << "╠═════╦════════╦════════╦════════════╦═══════╦══════════════════╦═════════╣" << std::endl;
-    std::cout << "║ ID  ║ PAC    ║ DOC    ║ FECHA      ║ HORA  ║ MOTIVO           ║ ESTADO  ║" << std::endl;
-    std::cout << "╠═════╬════════╬════════╬════════════╬═══════╬══════════════════╬═════════╣" << std::endl;
+     std::cout << "\n╔═══════════════════════════════════════════════════════════════════╗" << std::endl;
+    std::cout << "║                              CITAS PENDIENTES                        ║" << std::endl;
+    std::cout << "╠═════╦════════╦════════╦════════════╦═══════╦═══════════════╦═════════╣" << std::endl;
+    std::cout << "║ ID  ║ PAC    ║ DOC    ║ FECHA      ║ HORA  ║ MOTIVO        ║ ESTADO  ║" << std::endl;
+    std::cout << "╠═════╬════════╬════════╬════════════╬═══════╬═══════════════╬═════════╣" << std::endl;
 
     int citasPendientes = 0;
     Cita cita;
@@ -2777,12 +2736,12 @@ void listarCitasPendientes() {
     archivoCitas.close();
 }
 
-// Listar todas las citas - ACCESO ALEATORIO
+// Listar todas las citas 
 void listarTodasCitas() {
     // 1. Leer header para saber cantidad
     ArchivoHeader header = leerHeader(FILE_CITAS);
     
-    // 2. ABRIR ARCHIVO
+    // 2. Abrir archivo
     ifstream archivo(FILE_CITAS, ios::binary);
     if (!archivo.is_open()) {
         mostrarError("No se pudo abrir archivo de citas");
@@ -2796,7 +2755,7 @@ void listarTodasCitas() {
     int citasActivas = 0;
     Cita cita;
     
-    // 3. LEER CADA CITA DEL ARCHIVO
+    // 3. Leer cada archivo
     for (int i = 0; i < header.cantidadRegistros; i++) {
         archivo.read(reinterpret_cast<char*>(&cita), sizeof(Cita));
         
@@ -2833,11 +2792,8 @@ void listarTodasCitas() {
     
     archivo.close();
 }
-
 //===========================================================
-
 //FUNCIONES DE MANTENIMIENTO DE ARCHIVOS
-
 //===========================================================
 bool verificarIntegridadReferencial() {
     std::cout << "\n=== VERIFICANDO INTEGRIDAD REFERENCIAL ===" << std::endl;
@@ -3106,9 +3062,17 @@ bool repararIntegridadReferencial() {
 }
 void hacerRespaldo() {
     const char* archivos[] = { "pacientes.bin", "doctores.bin", "citas.bin", "historiales.bin" };
-    for (const char* nombre : archivos) {
+    for (int i = 0; i < 4; i++) {
+        const char* nombre = archivos[i];
+        
+        // Crear nombre del respaldo manualmente
+        char nombreRespaldo[50];
+        strcpy(nombreRespaldo, "respaldo_");
+        strcat(nombreRespaldo, nombre);
+        
         std::ifstream origen(nombre, std::ios::binary);
-        std::ofstream destino((std::string("respaldo_") + nombre).c_str(), std::ios::binary);
+        std::ofstream destino(nombreRespaldo, std::ios::binary);
+        
         if (origen && destino) {
             destino << origen.rdbuf();
             std::cout << " Respaldo creado para " << nombre << "\n";
@@ -3117,12 +3081,17 @@ void hacerRespaldo() {
         }
     }
 }
-
 void restaurarRespaldo() {
     const char* archivos[] = { "pacientes.bin", "doctores.bin", "citas.bin", "historiales.bin" };
-    for (const char* nombre : archivos) {
-        std::ifstream respaldo((std::string("respaldo_") + nombre).c_str(), std::ios::binary);
+    for (int i = 0; i < 4; i++) {
+        const char* nombre = archivos[i];
+        char nombreRespaldo[50];
+        strcpy(nombreRespaldo, "respaldo_");
+        strcat(nombreRespaldo, nombre);
+        
+        std::ifstream respaldo(nombreRespaldo, std::ios::binary);
         std::ofstream destino(nombre, std::ios::binary | std::ios::trunc);
+        
         if (respaldo && destino) {
             destino << respaldo.rdbuf();
             std::cout << " Restaurado desde respaldo: " << nombre << "\n";
@@ -3308,6 +3277,12 @@ void menuPacientes() {
     std::cout << "Ingrese ID del paciente: ";
     std::cin >> id;
     std::cin.ignore();
+ Paciente paciente = buscarPacientePorID(id);
+    if (paciente.id == -1) {
+        mostrarError("Paciente no encontrado");
+        break;
+    }
+
     int cantidad;
     HistorialMedico* historial = leerHistorialCompleto(id, &cantidad);
     
@@ -3321,6 +3296,7 @@ void menuPacientes() {
         delete[] historial; // Liberar memoria
     } else {
         std::cout << "No se encontró historial médico para este paciente." << std::endl;
+        
     }
     break;
 }
@@ -3668,7 +3644,8 @@ void menuDoctores() {
                 break;
 
             }
-case 4: {
+        
+case 5: {
     // Ver citas de un doctor
     int doctorID;
     std::cout << "\n=== CITAS DE DOCTOR ===" << std::endl;
@@ -3676,7 +3653,7 @@ case 4: {
     std::cin >> doctorID;
     limpiarBuffer();
     
-    int cantidad;
+        int cantidad;
     Cita* citas = leerCitasDeDoctor(doctorID, &cantidad);
     
     if (citas != NULL) {
@@ -3702,7 +3679,7 @@ case 4: {
     }
     break;
     }
-            
+
                       case 6: {
                 // Ver citas de una fecha
                 char fecha[11];
@@ -3754,6 +3731,7 @@ case 4: {
         
     } while (opcion != 0);
 }
+
 void menuMantenimiento() {
     int opcion;
     do {
