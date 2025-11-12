@@ -3679,7 +3679,46 @@ case 5: {
     }
     break;
     }
+case 4: {
+   
+    int pacienteID;
+    std::cout << "\n=== CITAS DE PACIENTE ===" << std::endl;
+    std::cout << "ID del paciente: ";
+    std::cin >> pacienteID;
+    limpiarBuffer();
+    
+  
+    Paciente paciente = buscarPacientePorID(pacienteID);
+    if (paciente.id == -1) {
+        mostrarError("Paciente no encontrado");
+        break;
+    }
+    
+    std::cout << "\n=== CITAS DE: " << paciente.nombre << " " << paciente.apellido << " ===" << std::endl;
+    std::cout << "=========================================" << std::endl;
 
+    int cantidad;
+    Cita* citas = leerCitasDePaciente(pacienteID, &cantidad);
+    
+    if (citas != NULL && cantidad > 0) {
+        for (int i = 0; i < cantidad; i++) {
+            Doctor doctor = buscarDoctorPorID(citas[i].DoctorID);
+            std::cout << "Cita #" << citas[i].id << " | ";
+            std::cout << "Fecha: " << citas[i].fecha << " | ";
+            std::cout << "Hora: " << citas[i].hora << " | ";
+            std::cout << "Doctor: " << doctor.nombre << " " << doctor.apellido << " | ";
+            std::cout << "Motivo: " << citas[i].motivo << " | ";
+            std::cout << "Estado: " << citas[i].estado << std::endl;
+        }
+        std::cout << "=========================================" << std::endl;
+        std::cout << "Total de citas: " << cantidad << std::endl;
+       
+        delete[] citas;
+    } else {
+        std::cout << "El paciente no tiene citas registradas." << std::endl;
+    }
+    break;
+}
                       case 6: {
                 // Ver citas de una fecha
                 char fecha[11];
