@@ -19,7 +19,7 @@ struct ArchivoHeader {
     int cantidadRegistros;
     int siguienteId;
     int registrosActivos;
-    int version =1;
+    int version ;
 };
 //--------------------------------
 //1.MODELO DE DATOS
@@ -37,7 +37,7 @@ struct HistorialMedico {
     int DoctorID;
     float costo;
 
-     //navegacion enlazada 
+    //navegacion enlazada 
     int siguienteConsultaId;
     //Metadata 
     bool eliminado;
@@ -454,7 +454,7 @@ bool compactarArchivoPacientes() {
     // Saltar header en archivo original
     archivoOriginal.seekg(sizeof(ArchivoHeader));
     // Mapa para re-indexar IDs viejos a nuevos
-    int mapaIDs[1000] = {0}; // Asumiendo máximo 1000 pacientes
+    int mapaIDs[50] = {0}; // Asumiendo máximo 50 pacientes
     int nuevoID = 1;
     Paciente paciente;
     // 3. Leer pacientes.bin registro por registro
@@ -642,7 +642,7 @@ bool compactarArchivoDoctores() {
     // Saltar header en archivo original
     archivoOriginal.seekg(sizeof(ArchivoHeader));
     // Mapa para re-indexar IDs
-    int mapaIDs[1000] = {0};
+    int mapaIDs[50] = {0};
     int nuevoID = 1;
     Doctor doctor;
     // 3. Leer doctores.bin registro por registro
@@ -771,7 +771,7 @@ bool compactarArchivoCitas() {
     // Saltar header en archivo original
     archivoOriginal.seekg(sizeof(ArchivoHeader));
     // Mapa para re-indexar IDs
-    int mapaIDs[1000] = {0};
+    int mapaIDs[50] = {0};
     int nuevoID = 1;
     Cita cita;
     // 3. Leer citas.bin registro por registro
@@ -847,7 +847,7 @@ bool compactarArchivoHistoriales() {
     // Saltar header en archivo original
     archivoOriginal.seekg(sizeof(ArchivoHeader));
     // Mapa para re-indexar IDs
-    int mapaIDs[1000] = {0};
+    int mapaIDs[50] = {0};
     int nuevoID = 1;
     HistorialMedico historial;
     // 3. Leer historiales.bin registro por registro
