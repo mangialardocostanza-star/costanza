@@ -21,219 +21,211 @@ struct ArchivoHeader {
     int registrosActivos;
     int version ;
 };
+//--------------------------------
+//1.MODELO DE DATOS
+//---------------------------------
+// Estructura HistorialMedico (archivo: historiales.bin)
 
-//============================================================================
-// CLASE UTILIDADES
-// ============================================================================
+struct HistorialMedico {
+    int id;
+    int PacienteID;
+    char fecha[11];
+    char hora[6];
+    char diagnostico[200];
+    char tratamiento[200];
+    char medicamentos[150];
+    int DoctorID;
+    float costo;
 
-class Utilidades {
-public:
-    static void limpiarBuffer() {
-        while(cin.get() != '\n');
-    }
-
-    static void pausar() {
-        cout << "\nPresione Enter para continuar...";
-        cin.ignore();
-        cin.get();
-    }
-
-    static void mostrarError(const char* mensaje) {
-        cout << "❌ Error: " << mensaje << endl;
-    }
-
-    static void mostrarExito(const char* mensaje) {
-        cout << "✅ " << mensaje << endl;
-    }
-
-    static bool validarFecha(const char* fecha) {
-        int año, mes, dia;
-        if(strlen(fecha) != 10) return false;
-        if(fecha[4] != '-' || fecha[7] != '-') return false;
-        
-        for(int i = 0; i < 10; i++) {
-            if(i == 4 || i == 7) continue;
-            if(fecha[i] < '0' || fecha[i] > '9') return false;
-        }
-        
-        año = (fecha[0]-'0')*1000 + (fecha[1]-'0')*100 + (fecha[2]-'0')*10 + (fecha[3]-'0');
-        mes = (fecha[5]-'0')*10 + (fecha[6]-'0');
-        dia = (fecha[8]-'0')*10 + (fecha[9]-'0');
-
-        if(año < 1900 || año > 2100) return false;
-        if(mes < 1 || mes > 12) return false;
-        if(dia < 1 || dia > 31) return false;
-
-        if(mes == 4 || mes == 6 || mes == 9 || mes == 11) {
-            if(dia > 30) return false;
-        } else if(mes == 2) {
-            bool esBisiesto = (año % 4 == 0 && año % 100 != 0) || (año % 400 == 0);
-            if(esBisiesto) {
-                if(dia > 29) return false;
-            } else {
-                if(dia > 28) return false;
-            }
-        }
-        return true;
-    }
-
-    static bool validarHora(const char* hora) {
-        if(strlen(hora) != 5) return false;
-        if(hora[2] != ':') return false;
-        
-        for(int i = 0; i < 5; i++) {
-            if(i == 2) continue;
-            if(hora[i] < '0' || hora[i] > '9') return false;
-        }
-        
-        int HH = (hora[0]-'0')*10 + (hora[1]-'0');
-        int MM = (hora[3]-'0')*10 + (hora[4]-'0');
-        
-        if(HH < 0 || HH > 23) return false;
-        if(MM < 0 || MM > 59) return false;
-        return true;
-    }
-
-    static bool validarEmail(const char* email) {
-        if(strlen(email) == 0) return false;
-        bool tieneArroba = false;
-        bool tienePunto = false;
-        
-        for(int i = 0; email[i] != '\0'; i++) {
-            if(email[i] == '@') tieneArroba = true;
-            else if(email[i] == '.' && tieneArroba) tienePunto = true;
-        }
-        return tieneArroba && tienePunto;
-    }
-
-    static int compararFechas(const char* fecha1, const char* fecha2) {
-        for(int i = 0; i < 10; i++) {
-            if(fecha1[i] < fecha2[i]) return -1;
-            if(fecha1[i] > fecha2[i]) return 1;
-        }
-        return 0;
-    }
-
-    static int mi_strcasecmp(const char* s1, const char* s2) {
-        while(*s1 && *s2) {
-            char c1 = (*s1 >= 'A' && *s1 <= 'Z') ? *s1 + 32 : *s1;
-            char c2 = (*s2 >= 'A' && *s2 <= 'Z') ? *s2 + 32 : *s2;
-            if(c1 != c2) return c1 - c2;
-            s1++;
-            s2++;
-        }
-        return *s1 - *s2;
-    }
+    //navegacion enlazada 
+    int siguienteConsultaId;
+    //Metadata 
+    bool eliminado;
+    time_t fecharegistro;
 };
-// ============================================================================
-// CLASE HOSPITAL
-// ============================================================================
 
-class Hospital {
-private:
+// Estructura Cita (archivo: citas.bin)
+
+struct Cita {
+    int id;
+    int PacienteID;
+    int  DoctorID;
+    char fecha[11];
+    char hora[6];
+    char motivo[150];
+    char estado[20];
+    char observaciones[200];
+    bool atendida;
+
+    //Referencia del historial
+    int consultaID;
+    //Metadata 
+    bool eliminado;
+    time_t fechaCreacion;
+    time_t fechaModificacion;
+};
+// Estructura Paciente (archivo: pacientes.bin)
+struct Paciente {
+    int id;
+    char nombre[50];
+    char apellido[50];
+    char cedula[20];
+    int edad;
+    char sexo;
+    char tipoSangre[5];
+    char telefono[15];
+    char direccion[100];
+    char email[50];
+    char alergias[500];
+    char observaciones[500];
+    bool activo;
+
+    //indices para relaciones 
+
+    int cantidadConsultas;
+    int primerConsultaID;
+    int cantidadCitas;
+    int citasIDs [20];
+
+    //Metadata 
+    bool eliminado;
+    time_t fechaCreacion;
+    time_t fechaModificacion;
+};
+// Estructura Doctor (archivo: doctores.bin)
+
+struct Doctor {
+    int id;
+    char nombre[50];
+    char apellido[50];
+    char cedula[20];
+    char especialidad[50];
+    int aniosExperiencia;
+    float costoConsulta;
+    char horarioAtencion[50];
+    char telefono[15];
+    char email[50];
+    bool disponible;
+
+    //relaciones con array fijos 
+    int cantidadPacientes;
+    int pacientesIDs[50];
+    int cantidadCitas;
+    int citasIDs[30];
+
+    //Metadata
+    bool eliminado;
+    time_t fechaCreacion;
+    time_t fechaModificacion;
+};
+// Estructura Hospital (archivo: hospital.bin) - Guarda contadores y datos generales
+struct Hospital {
     char nombre[100];
     char direccion[150];
     char telefono[15];
+    
     int siguienteIdPaciente;
     int siguienteIdDoctor;
     int siguienteIdCita;
     int siguienteIdConsulta;
+
+    // Estadísticas
     int totalPacientesRegistrados;
     int totalDoctoresRegistrados;
     int totalCitasAgendadas;
     int totalConsultasRealizadas;
-
-public:
-    Hospital() {
-        strcpy(nombre, "Hospital Coco 2");
-        strcpy(direccion, "");
-        strcpy(telefono, "");
-        siguienteIdPaciente = 1;
-        siguienteIdDoctor = 1;
-        siguienteIdCita = 1;
-        siguienteIdConsulta = 1;
-        totalPacientesRegistrados = 0;
-        totalDoctoresRegistrados = 0;
-        totalCitasAgendadas = 0;
-        totalConsultasRealizadas = 0;
-    }
-
-    // Getters
-    const char* getNombre() const { return nombre; }
-    const char* getDireccion() const { return direccion; }
-    const char* getTelefono() const { return telefono; }
-    int getSiguienteIdPaciente() const { return siguienteIdPaciente; }
-    int getSiguienteIdDoctor() const { return siguienteIdDoctor; }
-    int getSiguienteIdCita() const { return siguienteIdCita; }
-    int getSiguienteIdConsulta() const { return siguienteIdConsulta; }
-    int getTotalPacientes() const { return totalPacientesRegistrados; }
-    int getTotalDoctores() const { return totalDoctoresRegistrados; }
-    int getTotalCitas() const { return totalCitasAgendadas; }
-    int getTotalConsultas() const { return totalConsultasRealizadas; }
-
-    // Setters
-    void setNombre(const char* nom) { 
-        strncpy(nombre, nom, 99); 
-        nombre[99] = '\0';
-    }
-    
-    void setDireccion(const char* dir) { 
-        strncpy(direccion, dir, 149); 
-        direccion[149] = '\0';
-    }
-    
-    void setTelefono(const char* tel) { 
-        strncpy(telefono, tel, 14); 
-        telefono[14] = '\0';
-    }
-
-    // Métodos de gestión de IDs
-    int generarIdPaciente() { 
-        int id = siguienteIdPaciente;
-        siguienteIdPaciente++;
-        return id;
-    }
-    
-    int generarIdDoctor() { 
-        int id = siguienteIdDoctor;
-        siguienteIdDoctor++;
-        return id;
-    }
-    
-    int generarIdCita() { 
-        int id = siguienteIdCita;
-        siguienteIdCita++;
-        return id;
-    }
-    
-    int generarIdConsulta() { 
-        int id = siguienteIdConsulta;
-        siguienteIdConsulta++;
-        return id;
-    }
-
-    // Métodos de estadísticas
-    void incrementarPacientes() { totalPacientesRegistrados++; }
-    void incrementarDoctores() { totalDoctoresRegistrados++; }
-    void incrementarCitas() { totalCitasAgendadas++; }
-    void incrementarConsultas() { totalConsultasRealizadas++; }
-    void decrementarPacientes() { if(totalPacientesRegistrados > 0) totalPacientesRegistrados--; }
-    void decrementarDoctores() { if(totalDoctoresRegistrados > 0) totalDoctoresRegistrados--; }
-    void decrementarCitas() { if(totalCitasAgendadas > 0) totalCitasAgendadas--; }
-
-    void mostrarEstadisticas() const {
-        cout << "\n=== ESTADÍSTICAS DEL HOSPITAL ===" << endl;
-        cout << "Pacientes registrados: " << totalPacientesRegistrados << endl;
-        cout << "Doctores registrados: " << totalDoctoresRegistrados << endl;
-        cout << "Citas agendadas: " << totalCitasAgendadas << endl;
-        cout << "Consultas realizadas: " << totalConsultasRealizadas << endl;
-        cout << "Próximo ID Paciente: " << siguienteIdPaciente << endl;
-        cout << "Próximo ID Doctor: " << siguienteIdDoctor << endl;
-        cout << "Próximo ID Cita: " << siguienteIdCita << endl;
-        cout << "Próximo ID Consulta: " << siguienteIdConsulta << endl;
-    }
 };
-
+//--------------------------------
+//2.PROTOTIPOS DE FUNCIONES
+//---------------------------------
+//1.funciones auxiliares
+// Inicialización y cierre
+Hospital inicializarHospital(const char* nombre);
+Hospital cargarDatosHospital();
+bool guardarDatosHospital(Hospital hospital);
+bool verificarIntegridadArchivos();
+// Doctores
+Doctor buscarDoctorPorID(int id);
+Doctor leerDoctorPorIndice(int indice);
+int buscarIndiceDoctorPorID(int id);
+bool agregarDoctor(Doctor nuevoDoctor);
+bool actualizarDoctor(Doctor doctorModificado);
+bool eliminarDoctor(int id);
+bool validarDatosDoctor(int aniosExperiencia, float costoConsulta);
+void listarTodosDoctores();
+// Pacientes
+Paciente buscarPacientePorID(int id);
+bool agregarPaciente(Paciente nuevoPaciente);
+Paciente buscarPacientePorCedula(const char* cedula);
+bool ExistePacienteConCedula(const char* cedula);
+Paciente leerPacienteporIndice(int indice);
+int buscarIndiceDeID(int id);
+bool actualizarPaciente(Paciente pacienteModificado);
+bool eliminarPaciente(int id);
+bool validarEdad(int edad);
+bool validarSexo(char sexo);
+void listarTodosPacientes();
+// Citas
+Cita buscarCitaPorID(int id);
+bool agregarCita(Cita nuevaCita);
+bool actualizarCita(Cita citaModificada);
+bool eliminarCita(int id);
+bool cancelarCita(int idCita);
+bool atenderCita(int idCita, const char* diagnostico, const char* tratamiento, const char* medicamentos, float costo);
+Cita buscarCitaPorID(int id);
+bool actualizarCita(Cita citaModificada);
+int buscarIndiceCitaPorID(int id);
+// Historiales Médicos
+HistorialMedico buscarHistorialPorID(int id);
+bool agregarHistorial(HistorialMedico nuevoHistorial);
+bool actualizarHistorial(HistorialMedico historialModificado);
+bool eliminarHistorial(int id);
+int buscarIndiceConsultaPorID(int id);
+bool actualizarConsulta(HistorialMedico consultaModificada);
+// Headers
+ArchivoHeader leerHeader(const char* nombreArchivo);
+bool actualizarHeader(const char* nombreArchivo, ArchivoHeader header);
+bool inicializarArchivo(const char* nombreArchivo);
+bool verificarArchivo(const char* nombreArchivo);
+// Utilidades
+time_t obtenerTimestamp();
+void mostrarError(const char* mensaje);
+void mostrarExito(const char* mensaje) ;
+void pausar();
+void limpiarBuffer();
+// Cálculo de posiciones
+long getPosicionPaciente(int indice);
+long getPosicionDoctor(int indice);
+long getPosicionCita(int indice);
+long getPosicionHistorial(int indice);
+// Validaciones
+int mi_strcasecmp(const char* s1, const char* s2);
+bool validarFecha(const char* fecha);
+bool validarHora(const char* hora);
+bool validarCedula(const char* cedula);
+bool validarEmail(const char* email);
+int compararFechas(const char* fecha1, const char* fecha2);
+// Menús
+bool verificarIntegridadArchivos();
+void menuPrincipal();
+void menuPacientes(); 
+void menuDoctores();
+void menuCitas();
+void mostrarMenuPrincipal();
+void menuMantenimiento();
+time_t obtenerTimestamp();
+// Para compactación
+bool actualizarReferenciasPacientes(int mapaIDs[]);
+bool actualizarReferenciasEnDoctores(int mapaIDs[]);
+bool actualizarReferenciasEnCitas(int mapaIDs[]);
+bool actualizarReferenciasEnHistoriales(int mapaIDs[]);
+bool actualizarReferenciasDoctores(int mapaIDs[]);
+bool actualizarReferenciasDoctoresEnCitas(int mapaIDs[]);
+bool actualizarReferenciasDoctoresEnHistoriales(int mapaIDs[]);
+// Para historial médico
+HistorialMedico buscarUltimaConsulta(int primeraConsultaID);
+HistorialMedico buscarConsultaPorID(int id);
+bool verificarDisponibilidadDoctor(int doctorID, const char* fecha, const char* hora);
 
 //-------------------------------------------
 //3.Definir funciones 
