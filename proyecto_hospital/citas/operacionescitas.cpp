@@ -5,6 +5,7 @@
 #include <fstream>
 #include <cstring>
 #include <ctime>
+#include "../persistencia/gestorarchivos.hpp"  
 
 using namespace std;
 
@@ -141,7 +142,7 @@ bool OperacionesCitas::cancelarCita(int idCita) {
 }
 
 bool OperacionesCitas::atenderCita(int idCita, const char* diagnostico, const char* tratamiento, 
-                          const char* medicamentos, float costo) {
+const char* medicamentos, float costo) {
     Cita cita = buscarCitaPorID(idCita);
     if (cita.getId() == -1) {
         mostrarError("Cita no encontrada");
@@ -168,9 +169,50 @@ bool OperacionesCitas::atenderCita(int idCita, const char* diagnostico, const ch
 }
 
 void OperacionesCitas::mostrarError(const char* mensaje) {
-    cout << "\033[1;31mError: " << mensaje << "\033[0m" << endl;
+    cout << "Error: " << mensaje << "" << endl;
 }
 
 void OperacionesCitas::mostrarExito(const char* mensaje) {
-    cout << "\033[1;32m" << mensaje << "\033[0m" << endl;
+    cout << "Exito:" << mensaje << "" << endl;
+}
+void OperacionesCitas::listarCitasPendientes() {
+    ArchivoHeader header = GestorArchivos::leerHeader(FILE_CITAS);
+    ifstream archivo(FILE_CITAS, ios::binary);
+    
+    if (!archivo.is_open()) {
+        cout << " Error al abrir archivo de citas" << endl;
+        return;
+    }
+    
+    archivo.seekg(sizeof(ArchivoHeader));
+    int citasPendientes = 0;
+    Cita cita;
+    
+    cout << "\n╔════════════════════════════════════════════════════════════╗" << endl;
+    cout << "║                    CITAS PENDIENTES                       ║" << endl;
+    cout << "╠═════╦════════════╦════════════╦════════════╦══════════════╣" << endl;
+    cout << "║ ID  ║ PacienteID ║ DoctorID   ║ Fecha      ║ Estado       ║" << endl;
+    cout << "╠═════╬════════════╬════════════╬════════════╬══════════════╣" << endl;
+
+    for (int i = 0; i < header.cantidadRegistros; i++) {
+        archivo.read(reinterpret_cast<char*>(&cita), sizeof(Cita));
+        if (archivo.fail()) break;
+        
+        if (!cita.getEliminado() && strcmp(cita.getEstado(), "PENDIENTE") == 0) {
+            citasPendientes++;
+            cout << "║ " << setw(3) << left << cita.getId() << " ";
+            cout << "║ " << setw(10) << left << cita.getPacienteID() << " ";
+            cout << "║ " << setw(10) << left << cita.getDoctorID() << " ";
+            cout << "║ " << setw(10) << left << cita.getFecha() << " ";
+            cout << "║ " << setw(12) << left << cita.getEstado() << "║" << endl;
+        }
+    }
+
+    if (citasPendientes == 0) {
+        cout << "║              NO HAY CITAS PENDIENTES                 ║" << endl;
+    }
+
+    cout << "╚═════╩════════════╩════════════╩════════════╩══════════════╝" << endl;
+    cout << "Total de citas pendientes: " << citasPendientes << endl;
+    archivo.close();
 }

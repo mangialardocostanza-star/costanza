@@ -17,7 +17,6 @@ Hospital::Hospital() {
     totalCitasAgendadas = 0;
     totalConsultasRealizadas = 0;
 }
-
 Hospital::Hospital(const char* nombre, const char* direccion, const char* telefono) {
     strncpy(this->nombre, nombre, 99);
     this->nombre[99] = '\0';
@@ -34,7 +33,6 @@ Hospital::Hospital(const char* nombre, const char* direccion, const char* telefo
     totalCitasAgendadas = 0;
     totalConsultasRealizadas = 0;
 }
-
 // Getters
 const char* Hospital::getNombre() const { return nombre; }
 const char* Hospital::getDireccion() const { return direccion; }

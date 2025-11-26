@@ -13,7 +13,8 @@ public:
     static bool eliminarCita(int id);
     static bool cancelarCita(int idCita);
     static bool atenderCita(int idCita, const char* diagnostico, const char* tratamiento, 
-                          const char* medicamentos, float costo);
+    const char* medicamentos, float costo);
+    static void listarCitasPendientes();                      
 private:
     static void mostrarError(const char* mensaje);
     static void mostrarExito(const char* mensaje);

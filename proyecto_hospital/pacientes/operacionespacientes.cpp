@@ -189,9 +189,15 @@ void OperacionesPacientes::listarTodosPacientes() {
         
         if (!paciente.getEliminado()) {
             pacientesActivos++;
-            string nombreCompleto = string(paciente.getNombre()) + " " + paciente.getApellido();
-            if (nombreCompleto.length() > 19) {
-                nombreCompleto = nombreCompleto.substr(0, 16) + "...";
+              char nombreCompleto[100];
+            snprintf(nombreCompleto, sizeof(nombreCompleto), "%s %s", 
+                     paciente.getNombre(), paciente.getApellido());
+            
+            if (strlen(nombreCompleto) > 21) {
+                nombreCompleto[18] = '.';
+                nombreCompleto[19] = '.';
+                nombreCompleto[20] = '.';
+                nombreCompleto[21] = '\0';
             }
             
             cout << "║ " << setw(3) << left << paciente.getId() << " ";

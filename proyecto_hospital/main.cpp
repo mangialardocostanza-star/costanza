@@ -209,24 +209,146 @@ void menuPacientes(Hospital& hospital) {
         GestorArchivos::limpiarBuffer();
         
         switch(opcion) {
-            case 1:
-                cout << "Registrar paciente - En desarrollo" << endl;
+            case 1:{
+    cout << "\n=== REGISTRAR NUEVO PACIENTE ===" << endl;
+    
+    // Crear nuevo paciente
+    Paciente nuevoPaciente;
+    char buffer[100];
+    
+    // Capturar datos
+    cout << "Nombre: ";
+    cin.getline(buffer, 100);
+    nuevoPaciente.setNombre(buffer);
+    
+    cout << "Apellido: ";
+    cin.getline(buffer, 100);
+    nuevoPaciente.setApellido(buffer);
+    
+    cout << "Cédula: ";
+    cin.getline(buffer, 100);
+    nuevoPaciente.setCedula(buffer);
+    
+    cout << "Edad: ";
+    int edad;
+    cin >> edad;
+    nuevoPaciente.setEdad(edad);
+    cin.ignore();  // Limpiar buffer
+    
+    cout << "Sexo (M/F): ";
+    char sexo;
+    cin >> sexo;
+    nuevoPaciente.setSexo(sexo);
+    cin.ignore();
+    
+    cout << "Teléfono: ";
+    cin.getline(buffer, 100);
+    nuevoPaciente.setTelefono(buffer);
+    
+    cout << "Email: ";
+    cin.getline(buffer, 100);
+    nuevoPaciente.setEmail(buffer);
+    
+    // Validar y guardar
+    if (OperacionesPacientes::existePacienteConCedula(nuevoPaciente.getCedula())) {
+        cout << "❌ Error: Ya existe un paciente con esta cédula" << endl;
+    } else if (OperacionesPacientes::agregarPaciente(nuevoPaciente)) {
+        hospital.incrementarPacientesRegistrados();
+        cout << "✅ Paciente registrado correctamente" << endl;
+    } else {
+        cout << "❌ Error al registrar paciente" << endl;
+    }
+    break;
+}
+            case 2: {
+                cout << "\n=== BUSCAR POR ID ===" << endl;
+                int id;
+                cout << "ID: ";
+                cin >> id;
+                cin.ignore();
+                // Aquí iría la búsqueda
+                cout << "Buscar paciente con ID: " << id << endl;
                 break;
-            case 2:
-                cout << "Buscar por ID - En desarrollo" << endl;
+            }
+            case 3: {
+                   cout << "\n=== BUSCAR POR CEDULA ===" << endl;
+                char cedula[20];
+                cout << "Cédula: ";
+                cin.getline(cedula, 20);
+                
+                Paciente paciente = OperacionesPacientes::buscarPacientePorCedula(cedula);
+                if (paciente.getId() != 0) {
+                    cout << "\n--- PACIENTE ENCONTRADO ---" << endl;
+                    cout << "ID: " << paciente.getId() << endl;
+                    cout << "Nombre: " << paciente.getNombre() << " " << paciente.getApellido() << endl;
+                    cout << "Cédula: " << paciente.getCedula() << endl;
+                    cout << "Edad: " << paciente.getEdad() << endl;
+                } else {
+                    cout << "❌ Paciente no encontrado" << endl;
+                }
                 break;
-            case 3:
-                cout << "Buscar por cedula - En desarrollo" << endl;
-                break;
+            }
             case 4:
                 OperacionesPacientes::listarTodosPacientes();
                 break;
-            case 5:
-                cout << "Actualizar paciente - En desarrollo" << endl;
+            case 5:{
+                 int id;
+                cout << "ID del paciente a actualizar: ";
+                cin >> id;
+                cin.ignore();
+                
+                Paciente paciente = OperacionesPacientes::buscarPacientePorID(id);
+                if (paciente.getId() == 0) {
+                    cout << "❌ Paciente no encontrado" << endl;
+                    break;
+                }
+                
+                cout << "Actualizando paciente: " << paciente.getNombre() << " " << paciente.getApellido() << endl;
+                
+                char buffer[100];
+                cout << "Nuevo nombre: ";
+                cin.getline(buffer, 100);
+                paciente.setNombre(buffer);
+                
+                cout << "Nuevo apellido: ";
+                cin.getline(buffer, 100);
+                paciente.setApellido(buffer);
+                
+                cout << "Nueva edad: ";
+                int edad;
+                cin >> edad;
+                paciente.setEdad(edad);
+                cin.ignore();
+                
+                if (OperacionesPacientes::actualizarPaciente(paciente)) {
+                    cout << "✅ Paciente actualizado correctamente" << endl;
+                } else {
+                    cout << "❌ Error al actualizar paciente" << endl;
+                }
+                break; 
+            }
+            case 6:{
+                int id;
+                cout << "ID del paciente a eliminar: ";
+                cin >> id;
+                cin.ignore();
+                
+                cout << "¿Está seguro de eliminar este paciente? (s/n): ";
+                char confirmacion;
+                cin >> confirmacion;
+                cin.ignore();
+                
+                if (confirmacion == 's' || confirmacion == 'S') {
+                    if (OperacionesPacientes::eliminarPaciente(id)) {
+                        cout << "✅ Paciente eliminado correctamente" << endl;
+                    } else {
+                        cout << "❌ Error al eliminar paciente" << endl;
+                    }
+                } else {
+                    cout << "Eliminación cancelada" << endl;
+                }
                 break;
-            case 6:
-                cout << "Eliminar paciente - En desarrollo" << endl;
-                break;
+            }
             case 0:
                 cout << "Volviendo..." << endl;
                 break;
@@ -251,24 +373,126 @@ void menuDoctores(Hospital& hospital) {
         GestorArchivos::limpiarBuffer();
         
         switch(opcion) {
-            case 1:
-                cout << "Registrar doctor - En desarrollo" << endl;
+            case 1:{
+               cout << "\n=== REGISTRAR DOCTOR ===" << endl;
+                Doctor d;
+                char buffer[100];
+                
+                cout << "Nombre: ";
+                cin.getline(buffer, 100);
+                d.setNombre(buffer);
+                
+                cout << "Apellido: ";
+                cin.getline(buffer, 100);
+                d.setApellido(buffer);
+                
+                cout << "Especialidad: ";
+                cin.getline(buffer, 100);
+                d.setEspecialidad(buffer);
+                
+                cout << "Años experiencia: ";
+                int exp;
+                cin >> exp;
+                d.setAniosExperiencia(exp);
+                cin.ignore();
+                
+                cout << "Costo consulta: ";
+                float costo;
+                cin >> costo;
+                d.setCostoConsulta(costo);
+                cin.ignore();
+                
+                if (OperacionesDoctores::agregarDoctor(d)) {
+                    cout << "✅ Doctor registrado!" << endl;
+                } else {
+                    cout << "❌ Error al registrar" << endl;
+                }
                 break;
-            case 2:
-                cout << "Buscar doctor por ID - En desarrollo" << endl;
+            }
+            case 2:{
+                 int id;
+                cout << "ID del doctor: ";
+                cin >> id;
+                cin.ignore();
+                
+                Doctor doctor = OperacionesDoctores::buscarDoctorPorID(id);
+                if (doctor.getId() != 0) {
+                    cout << "\n--- DOCTOR ENCONTRADO ---" << endl;
+                    cout << "ID: " << doctor.getId() << endl;
+                    cout << "Nombre: " << doctor.getNombre() << " " << doctor.getApellido() << endl;
+                    cout << "Especialidad: " << doctor.getEspecialidad() << endl;
+                    cout << "Experiencia: " << doctor.getAniosExperiencia() << " años" << endl;
+                    cout << "Costo: $" << doctor.getCostoConsulta() << endl;
+                } else {
+                    cout << "❌ Doctor no encontrado" << endl;
+                }
                 break;
+            }
             case 3:
                 OperacionesDoctores::listarTodosDoctores();
                 break;
-            case 4:
-                cout << "Listar por especialidad - En desarrollo" << endl;
+            case 4:{
+                 char especialidad[50];
+                cout << "Especialidad: ";
+                cin.getline(especialidad, 50);
+                
+                Doctor resultados[100];
+                int cantidad = OperacionesDoctores::buscarDoctoresPorEspecialidad(especialidad, resultados, 100);
+                OperacionesDoctores::mostrarDoctoresArray(resultados, cantidad);
                 break;
-            case 5:
-                cout << "Actualizar doctor - En desarrollo" << endl;
+            }
+            case 5:{
+                  int id;
+                cout << "ID del doctor a actualizar: ";
+                cin >> id;
+                cin.ignore();
+                
+                Doctor doctor = OperacionesDoctores::buscarDoctorPorID(id);
+                if (doctor.getId() == 0) {
+                    cout << "❌ Doctor no encontrado" << endl;
+                    break;
+                }
+                
+                char buffer[100];
+                cout << "Nuevo nombre: ";
+                cin.getline(buffer, 100);
+                doctor.setNombre(buffer);
+                
+                cout << "Nuevo apellido: ";
+                cin.getline(buffer, 100);
+                doctor.setApellido(buffer);
+                
+                cout << "Nueva especialidad: ";
+                cin.getline(buffer, 100);
+                doctor.setEspecialidad(buffer);
+                
+                if (OperacionesDoctores::actualizarDoctor(doctor)) {
+                    cout << "✅ Doctor actualizado correctamente" << endl;
+                } else {
+                    cout << "❌ Error al actualizar doctor" << endl;
+                }
                 break;
-            case 6:
-                cout << "Eliminar doctor - En desarrollo" << endl;
+            }
+            case 6:{
+                 int id;
+                cout << "ID del doctor a eliminar: ";
+                cin >> id;
+                cin.ignore();
+                cout << "¿Está seguro de eliminar este doctor? (s/n): ";
+                char confirmacion;
+                cin >> confirmacion;
+                cin.ignore();
+                if (confirmacion == 's' || confirmacion == 'S') {
+                    if (OperacionesDoctores::eliminarDoctor(id)) {
+                        cout << "✅ Doctor eliminado correctamente" << endl;
+                    } else {
+                        cout << "❌ Error al eliminar doctor" << endl;
+                    }
+                } else {
+                    cout << "Eliminación cancelada" << endl;
+                }
                 break;
+            }
             case 0:
                 cout << "Volviendo..." << endl;
                 break;
@@ -292,21 +516,134 @@ void menuCitas(Hospital& hospital) {
         GestorArchivos::limpiarBuffer();
         
         switch(opcion) {
-            case 1:
-                cout << "Agendar cita - En desarrollo" << endl;
+            case 1:{
+                   Cita c;
+                char buffer[100];
+                int idPaciente, idDoctor;
+                
+                cout << "ID del Paciente: ";
+                cin >> idPaciente;
+                cin.ignore();
+                
+                cout << "ID del Doctor: ";
+                cin >> idDoctor;
+                cin.ignore();
+                
+                cout << "Fecha (YYYY-MM-DD): ";
+                cin.getline(buffer, 100);
+                c.setFecha(buffer);
+                
+                cout << "Hora (HH:MM): ";
+                cin.getline(buffer, 100);
+                c.setHora(buffer);
+                
+                cout << "Motivo: ";
+                cin.getline(buffer, 100);
+                c.setMotivo(buffer);
+                
+                c.setPacienteID(idPaciente);
+                c.setDoctorID(idDoctor);
+                c.setEstado("PENDIENTE");
+                
+                if (OperacionesCitas::agregarCita(c)) {
+                    cout << "✅ Cita agendada correctamente" << endl;
+                } else {
+                    cout << "❌ Error al agendar cita" << endl;
+                }
                 break;
-            case 2:
-                cout << "Buscar cita - En desarrollo" << endl;
+            }
+            case 2:{
+                  int id;
+                cout << "ID de la cita: ";
+                cin >> id;
+                cin.ignore();
+                
+                Cita cita = OperacionesCitas::buscarCitaPorID(id);
+                if (cita.getId() != 0) {
+                    cout << "\n--- CITA ENCONTRADA ---" << endl;
+                    cout << "ID: " << cita.getId() << endl;
+                    cout << "Paciente ID: " << cita.getPacienteID() << endl;
+                    cout << "Doctor ID: " << cita.getDoctorID() << endl;
+                    cout << "Fecha: " << cita.getFecha() << endl;
+                    cout << "Hora: " << cita.getHora() << endl;
+                    cout << "Motivo: " << cita.getMotivo() << endl;
+                    cout << "Estado: " << cita.getEstado() << endl;
+                } else {
+                    cout << "❌ Cita no encontrada" << endl;
+                }
                 break;
-            case 3:
-                cout << "Cancelar cita - En desarrollo" << endl;
+            }
+            case 3:{
+                int id;
+                cout << "ID de la cita a cancelar: ";
+                cin >> id;
+                cin.ignore();
+                
+                Cita cita = OperacionesCitas::buscarCitaPorID(id);
+                if (cita.getId() == 0) {
+                    cout << "❌ Cita no encontrada" << endl;
+                    break;
+                }
+                
+                cout << "Cita encontrada - Paciente: " << cita.getPacienteID() << ", Doctor: " << cita.getDoctorID() << endl;
+                cout << "¿Está seguro de cancelar esta cita? (s/n): ";
+                char confirmacion;
+                cin >> confirmacion;
+                cin.ignore();
+                
+                if (confirmacion == 's' || confirmacion == 'S') {
+                    if (OperacionesCitas::cancelarCita(id)) {
+                        cout << "✅ Cita cancelada correctamente" << endl;
+                    } else {
+                        cout << "❌ Error al cancelar cita" << endl;
+                    }
+                } else {
+                    cout << "Cancelación cancelada" << endl;
+                }
                 break;
-            case 4:
-                cout << "Atender cita - En desarrollo" << endl;
+            }
+            case 4:{
+                 int id;
+                cout << "ID de la cita a atender: ";
+                cin >> id;
+                cin.ignore();
+                
+                Cita cita = OperacionesCitas::buscarCitaPorID(id);
+                if (cita.getId() == 0) {
+                    cout << "❌ Cita no encontrada" << endl;
+                    break;
+                }
+                
+                cout << "Atendiendo cita - Paciente: " << cita.getPacienteID() << endl;
+                
+                char diagnostico[100], tratamiento[100], medicamentos[100];
+                float costo;
+                
+                cout << "Diagnóstico: ";
+                cin.getline(diagnostico, 100);
+                
+                cout << "Tratamiento: ";
+                cin.getline(tratamiento, 100);
+                
+                cout << "Medicamentos: ";
+                cin.getline(medicamentos, 100);
+                
+                cout << "Costo de la consulta: ";
+                cin >> costo;
+                cin.ignore();
+                
+                if (OperacionesCitas::atenderCita(id, diagnostico, tratamiento, medicamentos, costo)) {
+                    cout << "✅ Cita atendida correctamente" << endl;
+                } else {
+                    cout << "❌ Error al atender cita" << endl;
+                }
                 break;
-            case 5:
-                cout << "Listar citas pendientes - En desarrollo" << endl;
-                break;
+            }
+            case 5:{
+    cout << "\n=== CITAS PENDIENTES ===" << endl;
+    OperacionesCitas::listarCitasPendientes();  // 👈 CAMBIAR POR ESTO
+    break;
+}
             case 0:
                 cout << "Volviendo..." << endl;
                 break;
