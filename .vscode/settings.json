@@ -1,5 +1,10 @@
 {
     "files.associations": {
         "iostream": "cpp"
-    }
+    },
+"code-runner.executorMap": {
+    "cpp": "cd $dir && mkdir -p output && clang++ -std=c++11 $fileName -o output/$fileNameWithoutExt && ./output/$fileNameWithoutExt"
+},
+"code-runner.runInTerminal": true,
+"code-runner.saveFileBeforeRun": true
 }

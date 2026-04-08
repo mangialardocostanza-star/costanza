@@ -17,7 +17,7 @@ bool OperacionesCitas::agregarCita(Cita& nuevaCita) {
         return false;
     }
 
-    // Abrir archivo en modo append
+    // Abrir archivo en modo de agregar
     ofstream archivo(FILE_CITAS, ios::binary | ios::app);
     if (!archivo) {
         mostrarError("Error al abrir el archivo de citas");
