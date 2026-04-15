@@ -8,15 +8,16 @@ template <class T>
 class Node {
 private:
     T data;
-    Node<T>* left;
-    Node<T>* right;
-    Node<T>* parent;
     int heigth;
     int fe;
 
 public:
+    Node<T>* left;
+    Node<T>* right;
+    Node<T>* parent;
     Node(T, Node<T>*, Node<T>*);
     ~Node();
+
 
     bool isLeaf();
     Node<T>* getChildren(int);
